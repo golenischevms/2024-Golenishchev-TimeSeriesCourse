@@ -28,8 +28,7 @@ class TimeSeriesKNN:
         if metric_params is not None:
             self.metric_params.update(metric_params)
 
-
-    def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> Self:
+    def fit(self, X_train: np.ndarray, Y_train: np.ndarray) -> 'TimeSeriesKNN':
         """
         Fit the model using X_train as training data and Y_train as labels
 
@@ -37,38 +36,44 @@ class TimeSeriesKNN:
         ----------
         X_train: train set with shape (ts_number, ts_length)
         Y_train: labels of the train set
-        
+
         Returns
         -------
         self: the fitted model
         """
-       
+
         self.X_train = X_train
         self.Y_train = Y_train
 
         return self
 
-
     def _distance(self, x_train: np.ndarray, x_test: np.ndarray) -> float:
         """
         Compute distance between the train and test samples
-        
+
         Parameters
         ----------
         x_train: sample of the train set
         x_test: sample of the test set
-        
+
         Returns
         -------
         dist: distance between the train and test samples
         """
 
-        dist = 0
-
-        # INSERT YOUR CODE
-
+        if self.metric == 'euclidean':
+            if self.metric_params['normalize']:
+                x_train = z_normalize(x_train)
+                x_test = z_normalize(x_test)
+            dist = ED_distance(x_train, x_test)
+        elif self.metric == 'dtw':
+            if self.metric_params['normalize']:
+                x_train = z_normalize(x_train)
+                x_test = z_normalize(x_test)
+            dist = DTW_distance(x_train, x_test, r=self.metric_params['r'])
+        else:
+            raise ValueError(f"Unknown metric: {self.metric}")
         return dist
-
 
     def _find_neighbors(self, x_test: np.ndarray) -> list[tuple[float, int]]:
         """
@@ -77,18 +82,23 @@ class TimeSeriesKNN:
         Parameters
         ----------
         x_test: sample of the test set
-        
+
         Returns
         -------
         neighbors: k nearest neighbors (distance between neighbor and test sample, neighbor label) for test sample
         """
 
-        neighbors = []
+        distances = []
+        for i, x_train in enumerate(self.X_train):
+            dist = self._distance(x_train, x_test)
+            distances.append((dist, self.Y_train[i]))
 
-        # INSERT YOUR CODE
+        # Сортировка по расстоянию
+        distances.sort(key=lambda x: x[0])
 
+        # Возвращаем k ближайших соседей
+        neighbors = distances[:self.n_neighbors]
         return neighbors
-
 
     def predict(self, X_test: np.ndarray) -> np.ndarray:
         """
@@ -104,11 +114,14 @@ class TimeSeriesKNN:
         """
 
         y_pred = []
-
-        # INSERT YOUR CODE
-
+        for x_test in X_test:
+            neighbors = self._find_neighbors(x_test)
+            # Получаем классы ближайших соседей
+            neighbor_labels = [label for _, label in neighbors]
+            # Прогнозируем класс как наиболее часто встречающийся среди соседей
+            pred_label = max(set(neighbor_labels), key=neighbor_labels.count)
+            y_pred.append(pred_label)
         return np.array(y_pred)
-
 
 def calculate_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
