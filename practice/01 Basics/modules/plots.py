@@ -6,8 +6,8 @@ import plotly
 from plotly.subplots import make_subplots
 from plotly.offline import init_notebook_mode
 import plotly.graph_objs as go
-plotly.offline.init_notebook_mode(connected=True)
 
+init_notebook_mode(connected=True)
 
 def plot_ts(ts_set: np.ndarray, plot_title: str = 'Input Time Series Set'):
     """
@@ -18,7 +18,13 @@ def plot_ts(ts_set: np.ndarray, plot_title: str = 'Input Time Series Set'):
     ts_set: time series set with shape (ts_number, ts_length)
     plot_title: title of plot
     """
-
+    
+    # Check if ts_set is a valid numpy array and has two dimensions
+    if not isinstance(ts_set, np.ndarray):
+        raise ValueError("Input must be a numpy array.")
+    if ts_set.ndim != 2:
+        raise ValueError("Input array must be two-dimensional, with shape (ts_number, ts_length).")
+    
     ts_num, m = ts_set.shape
 
     fig = go.Figure()
@@ -44,7 +50,7 @@ def plot_ts(ts_set: np.ndarray, plot_title: str = 'Input Time Series Set'):
                      linewidth=1,
                      tickwidth=1)
 
-    fig.update_layout(title={'text': plot_title, 'x': 0.5, 'y':0.9, 'xanchor': 'center', 'yanchor': 'top'},
+    fig.update_layout(title={'text': plot_title, 'x': 0.5, 'y': 0.9, 'xanchor': 'center', 'yanchor': 'top'},
                       title_font=dict(size=18, color='black'),
                       plot_bgcolor="rgba(0,0,0,0)",
                       paper_bgcolor='rgba(0,0,0,0)',

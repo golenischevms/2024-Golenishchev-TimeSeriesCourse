@@ -11,7 +11,7 @@ plotly.offline.init_notebook_mode(connected=True)
 from modules.mp import *
 
 
-def heads_tails(consumptions: dict, cutoff, house_idx: list) -> dict, dict:
+def heads_tails(consumptions: dict, cutoff, house_idx: list) -> tuple[dict, dict]:
     """
     Split time series into two parts: Head and Tail
 
@@ -34,6 +34,7 @@ def heads_tails(consumptions: dict, cutoff, house_idx: list) -> dict, dict:
         tails[f'T_{i}'] = consumptions[f'House{i}'][consumptions[f'House{i}'].index >= cutoff]
     
     return heads, tails
+
 
 
 def meter_swapping_detection(heads: dict, tails: dict, house_idx: dict, m: int) -> dict:
@@ -110,3 +111,4 @@ def plot_consumptions_ts(consumptions: dict, cutoff, house_idx: list):
                       )
 
     fig.show(renderer="colab")
+

@@ -15,9 +15,11 @@ def ED_distance(ts1: np.ndarray, ts2: np.ndarray) -> float:
     ed_dist: euclidean distance between ts1 and ts2
     """
     
-    ed_dist = 0
+    # Проверка на равенство длины временных рядов
+    if len(ts1) != len(ts2):
+        raise ValueError("Time series must be of the same length.")
 
-    # INSERT YOUR CODE
+    ed_dist = np.sqrt(np.sum((ts1 - ts2) ** 2))  # Евклидово расстояние
 
     return ed_dist
 
@@ -33,33 +35,51 @@ def norm_ED_distance(ts1: np.ndarray, ts2: np.ndarray) -> float:
 
     Returns
     -------
-    norm_ed_dist: normalized Euclidean distance between ts1 and ts2s
+    norm_ed_dist: normalized Euclidean distance between ts1 and ts2
     """
+    
+    # Проверка на равенство длины временных рядов
+    if len(ts1) != len(ts2):
+        raise ValueError("Time series must be of the same length.")
 
-    norm_ed_dist = 0
-
-    # INSERT YOUR CODE
+    ed_dist = ED_distance(ts1, ts2)  # Вычисляем евклидово расстояние
+    norm_ed_dist = ed_dist / np.sqrt(len(ts1))  # Нормализованное расстояние
 
     return norm_ed_dist
 
 
-def DTW_distance(ts1: np.ndarray, ts2: np.ndarray, r: float = 1) -> float:
+def DTW_distance(ts1: np.ndarray, ts2: np.ndarray) -> float:
     """
-    Calculate DTW distance
+    Calculate DTW distance without Sakoe-Chiba constraint.
 
     Parameters
     ----------
     ts1: first time series
     ts2: second time series
-    r: warping window size
     
     Returns
     -------
     dtw_dist: DTW distance between ts1 and ts2
     """
 
-    dtw_dist = 0
+    n = len(ts1)
+    m = len(ts2)
 
-    # INSERT YOUR CODE
+    # Создаем матрицу DTW
+    dtw_matrix = np.zeros((n + 1, m + 1))
+    dtw_matrix[0, 1:] = np.inf
+    dtw_matrix[1:, 0] = np.inf
+    dtw_matrix[0, 0] = 0
 
-    return dtw_dist
+    # Заполняем матрицу DTW без учета ограничения Сако-Чиба
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            cost = (ts1[i - 1] - ts2[j - 1]) ** 2
+            dtw_matrix[i, j] = cost + min(dtw_matrix[i - 1, j],    # Прямо
+                                           dtw_matrix[i, j - 1],    # Вниз
+                                           dtw_matrix[i - 1, j - 1])  # По диагонали
+
+    return dtw_matrix[n, m]
+
+
+

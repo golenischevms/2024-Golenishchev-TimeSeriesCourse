@@ -11,7 +11,7 @@ import plotly.express as px
 plotly.offline.init_notebook_mode(connected=True)
 
 
-def plot_ts(ts: np.ndarrray, title: str = 'Input Time Series') -> None:
+def plot_ts(ts: np.ndarray, title: str = 'Input Time Series') -> None:
     """
     Plot the time series
 
@@ -53,6 +53,8 @@ def plot_ts(ts: np.ndarrray, title: str = 'Input Time Series') -> None:
                       )
 
     fig.show(renderer="colab")
+
+
 
 
 
@@ -193,28 +195,25 @@ def plot_discords(mp: dict, top_k_discords: dict) -> None:
     fig.show(renderer="colab")
 
 
-def plot_segmentation(mp: dict, threshold: float) -> None:
-    """
-    Plot the segmented time series
-    
-    Parameters
-    ----------
-    mp: the matrix profile structure
-    threshold: threshold
-    """
+def plot_segmentation(ts1, mp, threshold):
+    n = len(ts1)
 
-    n = len(mp['data']['ts1'])
-
+    # Создаем подграфики
     fig = make_subplots(rows=2, cols=1,
                         shared_xaxes=True,
                         vertical_spacing=0.15,
                         subplot_titles=("The segmented time series", "Matrix Profile"))
 
-    fig.add_trace(go.Scatter(x=np.arange(n), y=mp['data']['ts1'], line=dict(color='#636EFA'), name="Time Series", showlegend = False), row=1, col=1)
-    fig.add_trace(go.Scatter(x=np.arange(n), y=mp['mp'], line=dict(color='#636EFA', width=2), name="Matrix Profile", showlegend = False), row=2, col=1)
-
+    # Визуализация временного ряда
+    fig.add_trace(go.Scatter(x=np.arange(n), y=ts1, line=dict(color='#636EFA'), name="Time Series", showlegend=False), row=1, col=1)
+    
+    # Визуализация матричного профиля
+    fig.add_trace(go.Scatter(x=np.arange(n), y=mp, line=dict(color='#636EFA', width=2), name="Matrix Profile", showlegend=False), row=2, col=1)
+    
+    # Пороговое значение
     fig.add_hline(y=threshold, line_width=3, line_dash="dash", line_color="red", row=2, col=1)
 
+    # Настройка осей и графика
     fig.update_annotations(font=dict(size=22, color='black'))
     fig.update_xaxes(showgrid=False,
                      title_font=dict(size=22, color='black'),
@@ -236,4 +235,5 @@ def plot_segmentation(mp: dict, threshold: float) -> None:
                       plot_bgcolor="rgba(0,0,0,0)",
                       paper_bgcolor='rgba(0,0,0,0)', height=700)
 
+    # Отображаем график
     fig.show(renderer="colab")

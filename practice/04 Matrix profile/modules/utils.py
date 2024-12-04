@@ -39,3 +39,4 @@ def apply_exclusion_zone(a: np.ndarray, idx: int, excl_zone: int, val: float) ->
     a[zone_start : zone_stop + 1] = val
 
     return a
+
